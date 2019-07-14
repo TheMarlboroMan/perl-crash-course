@@ -1,0 +1,3 @@
+#Fun with perl...
+
+A few Perl scripts whose purpose is to teach the essentials of the language to people who already know about coding.
