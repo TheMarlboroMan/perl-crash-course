@@ -16,10 +16,23 @@ with perl 5.16.3.
 - Basic knowledge about filesystems and streams is required (what is a file,
 	what is the standard input/output...).
 
-#Using strict and warnings.
+#Why Perl?
+
+And why not? Despite its age, Perl is still widely used and actively developed.
+The more languages we know, the more tools we have at our disposal!. Even the
+minimal notions about any language are better than no notions at all, not only
+for our resumé but also for our critical thinking capabilities, memory and 
+general attitude towards life (for real).
+
+#Using strict and warnings in Perl:
 
 Always, always, always, always use string and use warnings. There's no point in
 not doing so.
+
+In fact, whatever language you develop in, please, turn reporting to the max
+(hint, hint, PHP, hint, hint), use the most strict subset possible and treat
+warnings as if they were errors. You will be glad you did, not today, nor
+tomorrow, but some day.
 
 #A word of warning.
 
