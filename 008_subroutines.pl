@@ -158,4 +158,12 @@ print "The sum of @arr is ",
 	$result{'max'}, 
 	$NL;
 
+#One more thing, nothing stops us from redefining a subroutine and shoot 
+#ourselves in the foot, as in:
+#sub sum_and_more {
+#	print "Bad deal\n";
+#}
+#sum_and_more(\@arr);
+#So let's not do that.
+
 #And that's about it.
