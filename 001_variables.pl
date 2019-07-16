@@ -2,14 +2,19 @@
 use strict;
 use warnings;
 
-#Comments are like in the bourne shell thing...
+#Comments are like in the bourne shell thing... Put a hashtag and comment away.
 
 #Variables in strict mode (reasonable choice) can be declared with the keywords my and our.
-#Variables starting with a dollar are scalars: that is, these are either numbers or strings.
-#Strings can either be double or single quoted.
-my $nl="\n";
+#Variables starting with a dollar are scalars: that is, these are either 
+#numbers or strings (so far).
+#Strings can either be double or single quoted. We will use double quotes
+#through these scripts. Unlike other script languages (I am looking at you,
+#Python) double and single quoted strings are different in which double quoted
+#strings allow for escape characters.
+my $single_quoted_string='hey, an unescaped \bar';
+my $nl="\n"; #Comments can also appear 
 #The string concatenation operator is a stupid dot...
-print("This is one string".$nl.'And this is another'.$nl);
+print("This is one string".$nl.'And this is another'.$nl.$single_quoted_string.$nl);
 
 #This is a block... In strict mode, variables are scoped to their block, which makes sense.
 {
