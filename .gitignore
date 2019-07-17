@@ -1,2 +1,3 @@
 resources/*
 !resources/input_file.txt
+!resources/sample_records.txt

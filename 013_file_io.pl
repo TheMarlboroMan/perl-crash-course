@@ -4,7 +4,6 @@ use warnings;
 
 my $NL="\n";
 
-
 #Input and output in perl is remarkable simple... We already know the basic
 #print operation and how to get data from the standard input...
 
@@ -17,7 +16,10 @@ sub basic_input_and_output {
 	print "You just wrote '$input'", $NL;
 }
 
-#The next thing we will learn is how to open a file to read from it...
+#The next thing we will learn is how to open a file to read from it. This
+#subroutine will read the parameters to get a filename and will try to open
+#the file. If the file can be opened, it will return a filehandle. It not,
+#it will return "undef", which is Perl for "undefined value".
 sub open_file_to_read {
 
 	my $filename=shift;
@@ -35,7 +37,11 @@ sub open_file_to_read {
 	return $filehandle;
 }
 
-
+#This subroutine will get a file handle (not a filename!!) from the parameters
+#and will read its contents, line by line, putting them out through the STDIN.
+#It will also try to detect if the handle is invalid according to the contract
+#in "open_file_to_read" (that is, return "undef" when the file cannot be 
+#opened).
 sub read_and_print_full_file {
 
 	#Most of these scripts gloss over the most basic validation, but be sure
@@ -62,7 +68,11 @@ sub read_and_print_full_file {
 	#Hands down, this might be the easiest file input ever.
 }
 
-#This subroutine will close the file passed.
+#This subroutine will close the file associated with the handle (not filename)
+#passed. As before, it will try to check if the handle is defined... Now it 
+#may be a good time to say that there are better ways of doing this kind of
+#checking (starting with prototypes and ending somewhere along the line), but
+#we will deal with these later.
 sub close_file {
 
 	my $handle=shift;
@@ -99,6 +109,7 @@ sub open_file_to_append {
 	return $filehandle;
 }
 
+#A simple loop to get data from the standard input and return it as an array.
 sub get_data_from_stdin {
 
 	my $type=shift;
@@ -116,7 +127,8 @@ sub get_data_from_stdin {
 }
 
 #This subroutine will get a filehandle and an array of strings, and will put
-#each of these strings to the file in a new line.
+#each of these strings to the file in a new line. Remember that arrays must be
+#passed by reference, hence $lines and @$lines.
 sub write_to_file {
 
 	my ($filehandle, $lines)=@_;
@@ -174,4 +186,6 @@ close_file($check_handle);
 #And remove the file.
 remove_file("resources/write_here.txt");
 
-#And that's it, basic file input/output.
+#And that's it, basic file input/output will enable to start being productive
+#with Perl. There's lot's we have yet to see (command line arguments, the naked
+#<> operator...) but let's try to write something in the next script.

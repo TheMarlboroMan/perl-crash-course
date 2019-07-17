@@ -20,7 +20,7 @@ my $current_id=0;
 #The constructor... Let us go step by step on this one...
 sub new {
 	#First, we get the data we need: remember that $class is "automatic".
-	my ($class, $name, $phone, $address)=@_;
+	my ($class, $name, $phone, $address, $id)=@_;
 
 	#Wel call the parent's new subroutine. It will return a blessed reference
 	#to the base object... The syntax here is "SUPER", class is 
@@ -28,9 +28,20 @@ sub new {
 	#"contact" by doing contact_revisited->PARENT::new.
 	my $data=$class->SUPER::new($name, $phone);
 
-	#Now we increment the id and add it to the blessed reference.
-	my $id=++$current_id;
-	$data->{id}=$id;
+	#Let's see if we got the id as a parameter...
+	my $instance_id=$id;
+
+	if(!defined $id) {
+		#If not, we increment the global id and add it to the blessed reference.
+
+		$instance_id=$current_id++;
+	}
+	else {
+		#If we got it, let's keep track of the global id...
+		$current_id=$instance_id+1 if $instance_id >= $current_id;
+	}
+
+	$data->{id}=$instance_id;
 	$data->{address}=$address;
 
 	#And finally return the reference.
