@@ -157,6 +157,8 @@ sub find_records {
 			}
 		}
 		elsif($field eq "phone") {
+
+			#TODO: regexes work on arrays too...
 			#The phone case is slightly different, but easy too
 			my $phones=join ",", $current->get_numbers();
 			if($phones =~ /$value/) {

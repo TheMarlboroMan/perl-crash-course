@@ -25,7 +25,7 @@ sub run {
 
 	my $this=shift;
 
-	print "'exit' to finish\n";
+	print "'exit' to finish, 'help' for commands\n";
 
 	while(1){
 
@@ -45,6 +45,7 @@ sub run {
 		#seems harder to read and that's always bad but I want to cover many
 		#ways of doing things...
 		given($command) {
+			$res=$this->__help() when "help";
 			$res=$this->__list() when "list";
 			$res=$this->__delete(@input) when "delete";
 			$res=$this->__new(@input) when "new"; 
@@ -64,6 +65,32 @@ sub run {
 	}
 }
 
+#A quick print thing... See that syntax? That's call "heredoc". Two < signs, 
+#and a customer delimiter, then, everything you write will preserve its format,
+#newlines and tabs included. When you want to be done, just write your custom
+#delimiter on its own line.
+sub __help {
+
+	print <<DELIMITER
+Available commands:
+	-help
+	-list
+	-delete [id]
+	-new
+	-add [id phone]
+	-remove [id phone]
+	-setname [id newvalue]
+	-setaddress[id newvalue]
+	-byname [find]
+	-byaddress [find]
+	-byphone[find]
+
+DELIMITER
+;
+
+	return 1;
+}
+
 #Validate that the count of items in the array @_[1] equals $_[0]...
 sub __validate_input {
 
@@ -80,7 +107,6 @@ sub __validate_input {
 }
 
 #And the rest is just glue... Lots and lots of glue.
-
 sub __list {
 
 	my $this=shift;
@@ -91,7 +117,7 @@ sub __list {
 	return 1;
 }
 
-#delete id
+#Glue...
 sub __delete {
 
 	my $this=shift;
@@ -99,7 +125,7 @@ sub __delete {
 	return $this->{rm}->delete_record(shift);
 }
 
-#add id phone
+#Even more glue...
 sub __add {
 
 	my $this=shift;
@@ -107,14 +133,15 @@ sub __add {
 	return $this->{rm}->add_phone_to_record(shift, shift);
 }
 
-#remove id phone
+#Some more glue...
 sub __remove {
 
+	my $this=shift;
 	return if !__validate_input(2, @_);
 	return $this->{rm}->remove_phone_from_record(shift, shift);
 }
 
-#setname id newname
+#And more glue...
 sub __set_name {
 
 	my $this=shift;
@@ -122,7 +149,7 @@ sub __set_name {
 	return $this->{rm}->update_record(shift, "name", shift);
 }
 
-#setaddress id newaddress
+#A bit more of glue...
 sub __set_address {
 
 	my $this=shift;
@@ -130,22 +157,44 @@ sub __set_address {
 	return $this->{rm}->update_record(shift, "address", shift);
 }
 
-#byname string
+#The next three are glue depending on a deeper glue thing...
 sub __by_name {
 
-	return if !__validate_input(1, @_);
+	my $this=shift;
+	return $this->__find_and_print("name", @_);
 }
 
-#byaddress string
 sub __by_address {
 
-	return if !__validate_input(1, @_);
+	my $this=shift;
+	return $this->__find_and_print("address", @_);
 }
 
-#byphone string
 sub __by_phone {
 
+	my $this=shift;
+	return $this->__find_and_print("phone", @_);
+}
+
+#Common glue find...
+sub __find_and_print {
+
+	my $this=shift;
+	my $type=shift;
+
 	return if !__validate_input(1, @_);
+	my @res=$this->{rm}->find_records($type, shift);
+	
+	if(! scalar @res) {
+		print "No data found\n";
+		return 1;
+	}
+
+	for(@res) {
+		print $_->describe(), "\n";
+	}
+
+	return 1;
 }
 
 sub __new {
