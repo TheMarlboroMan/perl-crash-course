@@ -66,6 +66,10 @@ print("\nA slice: ", @a_slice, "\n");
 my $a_slice="I love cheese";
 print("This is the array @a_slice and this is the string '$a_slice'\n");
 
+#If we want to print the items of an array we might as well use "join", which
+#will return a string with its contents, separated by the first argument.
+print("This is my joined array : ", join(", ", @a_slice), "\n");
+
 #We can also "cast" an array to scalar and get its size...
 print("The array has ", scalar @numeric_array, " elements and the slice has ", scalar @a_slice, "\n");
 
@@ -73,6 +77,14 @@ print("The array has ", scalar @numeric_array, " elements and the slice has ", s
 #I am also trying to find the logic of using the $. I guess this is perl's way of saying "I want an scalar if
 #i use $, and I want an array if I use @".
 print("Largest index of array is ", $#numeric_array,"\n");
+
+#This one is great... what do you think this does?
+my @many_arrays=(1,2,3,(4,5,6),7,8,9);
+
+#Yep, that's not an array with a second array inside: Perl flattens the arrays.
+#As weird as that sounds, this will be important later, when doing subroutine
+#arguments...
+print("Flattened array: ", join (", ", @many_arrays), "\n");
 
 #And of course, we have our suite of array operations: pop, push, shift, unshift...
 #Starting from the empty list...

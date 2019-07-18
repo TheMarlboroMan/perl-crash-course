@@ -27,7 +27,11 @@ my $ref_to_prompt=\&prompt;
 &{$ref_to_prompt};
 
 #Subroutines take arguments, of course... In this case, arguments are stored in
-#the local array @_.
+#the local array @_. You might be wondering "what about prototypes?", oh, yes,
+#they exist in Perl but they don't do what you think they do. In fact, the
+#easiest way to go about subroutine arguments is to assume and understand
+#right now that arguments always are in the special array @_. That's the way
+#it goes with Perl.
 sub prompt_2 {
 	my $symbol=$_[0];
 	print $symbol,$NL;
@@ -35,10 +39,11 @@ sub prompt_2 {
 
 prompt_2("=>");
 
-#Of course, nobody will ever forbide us from doing...
+#Of course, nobody will ever forbide us from adding more arguments than we need.
+#See all these arguments? They will be flattened into an array...
 prompt_2(">>", "these", "are", "all", "unused");
 
-#So, perhaps... remember "scalar"?
+#So, perhaps we can do some checks like... remember "scalar"?
 sub prompt_3 {
 	unless(1==scalar @_) {
 		print("prompt_3 must be called with a single argument$NL");
@@ -116,13 +121,25 @@ $param1=0;
 $return_value=pass_by_copy($param1);
 print "param1 has a value of ", $param1, " and return_value is ", $return_value, $NL;
 
-#Passing arrays to routines needs references. This subroutine will calculate 
-#the sum of all values in the array...
+#In fact, we'd rather look at this idiom right away: this is the way we usually
+#get our arguments in Perl: a single "my" with the list of arguments, extracted
+#from @_. This way, we make our copies of the arguments and give them names...
+sub argument_idiom {
+
+	my ($arg1, $arg2, $arg3)=@_; #These are silly names, in any case.
+	print "arg1=$arg1, arg2=$arg2, arg3=$arg3", $NL;
+}
+argument_idiom("Three", "Little", "Pigs");
+
+#Passing arrays to routines needs references. Why? Well, remember how Perl
+#flattens arrays with other arrays inside? Remember how arguments in Perl are
+#always in an array? How do you think these two things play together?. 
+#Anyhow, this subroutine will calculate the sum of all values in the array...
 sub sum_array {
 
-	my $retval=0;
 	my $arr_ref=$_[0];	#This is the reference to the array...
 
+	my $retval=0;
 	for my $item (@$arr_ref) { #Substitute the array for its reference and we are done...
 		$retval+=$item;
 	}

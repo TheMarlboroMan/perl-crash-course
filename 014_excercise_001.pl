@@ -51,9 +51,8 @@ use warnings;
 
 use record_manager_exercise;
 
-#Let's set the module up...
-record_manager_exercise::set_filename("resources/014_excercise_records.txt");
-record_manager_exercise::read_records();
+#Let's set the module up... 
+my $record_manager=record_manager_exercise->new("resources/014_excercise_records.txt");
 
 #Some might actually prefer to load all modules in the same place, for clarity 
 #sake, but for the purposes of this example we load and setup them separatedly.
@@ -61,10 +60,8 @@ record_manager_exercise::read_records();
 
 #Finally, this other module, read the file and notice how it requires a third
 #module...
-use controller_module_excercise;
+use controller_module_exercise;
 
 #All that is left, is the setup...
-my $controller=controller_module_excercise->new();
+my $controller=controller_module_exercise->new($record_manager);
 $controller->run();
-
-

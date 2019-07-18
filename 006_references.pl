@@ -75,8 +75,8 @@ for my $key (keys(%$ref)) {
 	print($key, " => ", $$ref{$key}, $NL);
 }
 
-#Finally, as for hashes and references, it is similar... Similarly confusing until one achieves
-#perl monkhood, I guess...
+#Finally, as for hashes and references, it is similar... Similarly confusing 
+#until one achieves perl monkhood, I guess...
 my %complex_hash=(
 	"k1" => 1, 
 	"k2" => $scalar_string,

@@ -25,55 +25,74 @@ package record_manager_exercise;
 #First off, we need the contact_revisited module!
 use contact_revisited;
 
-#And we will need some storage for the contacts. There we go, an empty array.
-my @_contacts=();
-my $_filename="";
+#And next we need to define our storage and other things... We could use a few
+#global variables for this module, but instead of that, we will build a class.
+#This way we might have several instances of these record managers, each 
+#with their own data, if need be.
 
-#We can now begin to build subroutines. This will set the filename for all
-#save and load operations...
-sub set_filename {
-	$_filename=shift;
+sub new {
+
+	my ($class, $filename)=@_;
+
+	#storage will be the array where we store stuff, filename will be the
+	#filename we read/write to.
+
+	#Note on syntax: this is way more real than previous examples: the outer
+	#{} creates a reference for a hash, the inner [] does the same for an array.
+	my $data={storage => [], filename => $filename};
+	bless $data, $class;
+
+	_read_records($data);
+
+	return $data;
 }
 
-#This one encapsulates reading data from the given file or the default filename.
-sub read_records {
-	
-	if(!length $_filename) {
+#We can now begin to build subroutines. This one encapsulates reading data from 
+#the given file or the default filename. Notice how this is "private", beginning
+#with an underscore. This is so because we want this class to be ready at 
+#construction time, so we call this method from the constructor.
+sub _read_records {
+
+	my $this=shift;
+
+	if(!length $this->{filename}) {
 		print "Filename must be set, exiting\n";
 		die;
 	}
 
 	#Try to load from the good file or the default file...
-	if(!_read_records_from_file($_filename)) {
+	if(!$this->_read_records_from_file($this->{filename})) {
 
-		print "Could not find $_filename, loading defaults...\n";
-		if(!_read_records_from_file("resources/sample_records.txt")) {
+		print "Could not find $this->{filename}, loading defaults...\n";
+		if(!$this->_read_records_from_file("resources/sample_records.txt")) {
 			print "Could not read records from default file. Exiting\n";
 			die; #Die will stop our program.
 		}
 
 		print "Saving defaults to real file...\n";
-		record_manager_exercise::save_records_to_file($_filename);
+		$this->save_records_to_file($this->{filename});
 	}
+
 
 	#Actually, it might be bad that our routines have these sort of secondary
 	#effects, such as printing to the stdout... Consider that your real 
 	#subroutines should do one thing and one thing only!.
-	print scalar @_contacts, " records loaded...\n";
+
+	print scalar @{$this->{storage}}, " records loaded...\n";
 }
 
 #This is the the private subroutine to read records from the file.  It will take 
-#the filename as a parameter and fill up @_contacts with the data. If we cannot 
+#the filename as a parameter and fill up @storage with the data. If we cannot 
 #open the file, we will return a false value. 
 sub _read_records_from_file {
 
-	my $filename=shift;
+	my ($this, $filename)=@_;
 
 	return 0 unless open(my $handle, "<", $filename);
 
 	#Just because we can, let us empty the storage, in case we want to call this
 	#suboutine more than once.
-	@_contacts=();
+	$this->{storage}=();
 	while(<$handle>) {
 
 		 #Remove the newline and get parameters from the file...
@@ -81,7 +100,7 @@ sub _read_records_from_file {
 		my ($id, $name, $address, $phones)=split '#', $_;
 
 		#Do we have a repeated id?
-		if(scalar find_records("id", $id)) {
+		if(scalar $this->find_records("id", $id)) {
 			close $handle;
 			print "Found repeated id $id, exiting\n";
 			die;
@@ -96,7 +115,7 @@ sub _read_records_from_file {
 		}
 
 		#Add the contact to the records...
-		push @_contacts, $record;
+		push @{$this->{storage}}, $record;
 	}
 
 	close $handle;
@@ -110,6 +129,8 @@ sub _read_records_from_file {
 #the index of the result.
 sub find_records {
 
+	my $this=shift;
+
 	#Make copies of the arguments $it is a copy of a possible @_[2], so any
 	#changes to $it mean nothing. We fix that it in the end.
 	my ($field, $value, $it)=@_;
@@ -118,7 +139,7 @@ sub find_records {
 
 	my @results;
 
-	for my $current (@_contacts) {
+	for my $current (@{$this->{storage}}) {
 		if($field eq "id") {
 			if($current->get_id() == $value) {
 				push @results, $current;
@@ -160,9 +181,13 @@ sub find_records {
 
 #This one is easy too... It will get the filename as a parameter and dump the
 #records according to the format specified in the exercise. In case of failure
-#to write, the program will exit.
+#to write, the program will exit. Considering the use we are doing here, might
+#as well be private... Still, for the record, think, does it make any sense
+#that any time we make a change we open our file, write all our data and then
+#close it?.
 sub save_records_to_file {
 
+	my $this=shift;
 	my $filename=shift;
 	my $handle;
 	if(!open($handle, ">", $filename)) {
@@ -170,7 +195,7 @@ sub save_records_to_file {
 		die;
 	}
 
-	for(@_contacts) {
+	for(@{$this->{storage}}) {
 		my @data=($_->get_id(),
 			$_->get_name(),
 			$_->get_address(),
@@ -189,18 +214,19 @@ sub save_records_to_file {
 #undefined record, we will return a false value.
 sub delete_record {
 
+	my $this=shift;
 	my $id=shift;
 	my $it=0;
-	my @results=find_records("id", $id, $it);
+	my @results=$this->find_records("id", $id, $it);
 	if(!scalar @results) {
 		return 0;
 	}
 
 	#Remove the contact...
-	splice @_contacts, $it, 1;
+	splice @{$this->{storage}}, $it, 1;
 
 	#...and dump to file :D.
-	save_records_to_file($_filename);
+	$this->save_records_to_file($this->{filename});
 	return 1;
 }
 
@@ -208,9 +234,9 @@ sub delete_record {
 #as parameters. If a record with the given id exists, it willchange the 
 #requested value and update the storage file. The subroutine will return a 
 #false value if the record is not defined.
-sub update_record {# (updates name or address)
+sub update_record {
 	
-	my ($id, $field, $value)=@_;
+	my ($this, $id, $field, $value)=@_;
 
 	my $methodname;
 	if($field eq "name" or $field eq "address") {
@@ -222,12 +248,12 @@ sub update_record {# (updates name or address)
 		die;
 	}
 
-	my @records=find_records("id", $id);
+	my @records=$this->find_records("id", $id);
 	return 0 if !scalar @records;
 
 	#Update values and dump...
 	$records[0]->$methodname($value);
-	save_records_to_file($_filename);
+	$this->save_records_to_file($this->{filename});
 	return 1;
 }
 
@@ -237,9 +263,9 @@ sub update_record {# (updates name or address)
 #"contact_revisited", so that's one less thing to worry about.
 sub create_record {
 
-	my ($name, $address, $phone)=@_;
-	push @_contacts, contact_revisited->new($name, $phone, $address);
-	save_records_to_file($_filename);
+	my ($this, $name, $address, $phone)=@_;
+	push @{$this->{storage}}, contact_revisited->new($name, $phone, $address);
+	$this->save_records_to_file($this->{filename});
 }
 
 #Again, an easy routine if we make use of the contact_revisited features. 
@@ -248,13 +274,13 @@ sub create_record {
 #rest of the implementation depends on "contact_revisited".
 sub add_phone_to_record {
 
-	my ($id, $new_phone)=@_;
+	my ($this, $id, $new_phone)=@_;
 
-	my @records=find_records("id", $id);
+	my @records=$this->find_records("id", $id);
 	return 0 if !scalar @records;
 
 	$records[0]->add_number($new_phone);
-	save_records_to_file($_filename);
+	$this->save_records_to_file($this->{filename});
 	return 1;
 }
 
@@ -263,13 +289,13 @@ sub add_phone_to_record {
 #internal implementation).
 sub delete_phone_from_record {
 	
-	my ($id, $phone)=@_;
+	my ($this, $id, $phone)=@_;
 
-	my @records=find_records("id", $id);
+	my @records=$this->find_records("id", $id);
 	return 0 if !scalar @records;
 
 	if($records[0]->remove_number($phone)) {
-		save_records_to_file($_filename);
+		$this->save_records_to_file($this->{filename});
 	}
 
 	#We may think about returning another value to indicate that the phone
@@ -277,14 +303,15 @@ sub delete_phone_from_record {
 	return 1;
 }
 
-#Return the records. Given that @_contacts is an array of references, any caller
+#Return the records. Given that @storage is an array of references, any caller
 #can change the records. Perl does not enforce strict encapsulation. We might
 #do a copy of all records and return it, but that would be overkill. Someone
 #said that perl would like you to stay away from internals because you are
 #polite, not because it has a shotgun.
 sub get_records {
 
-	return @_contacts;
+	my $this=shift;
+	return @{$this->{storage}};
 }
 
 #Return a true value from a module, always.
