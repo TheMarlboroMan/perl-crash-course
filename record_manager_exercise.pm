@@ -17,6 +17,7 @@ package record_manager_exercise;
 # create_record
 # add_phone_to_record
 # delete_phone_from_record
+# get_records
 
 #These methods will be the "public" interface for this class. The private 
 #interface will be any other helper methods we may come accross.
@@ -109,6 +110,8 @@ sub _read_records_from_file {
 #the index of the result.
 sub find_records {
 
+	#Make copies of the arguments $it is a copy of a possible @_[2], so any
+	#changes to $it mean nothing. We fix that it in the end.
 	my ($field, $value, $it)=@_;
 
 	$it=0 if defined $it;
@@ -144,10 +147,13 @@ sub find_records {
 			die();
 		}
 
-		#Perls parameters are passed by reference, so the caller can get 
-		#the index of the result by checking $it.
 		++$it if defined $it;
 	}
+
+
+	#Perls parameters are passed by reference, so the caller can get 
+	#the index of the result by checking their third parameter.
+	$_[2]=$it if defined $it;
 
 	return @results;
 }
@@ -269,6 +275,16 @@ sub delete_phone_from_record {
 	#We may think about returning another value to indicate that the phone
 	#does not exist, but for the purposes of this example, all is ok.
 	return 1;
+}
+
+#Return the records. Given that @_contacts is an array of references, any caller
+#can change the records. Perl does not enforce strict encapsulation. We might
+#do a copy of all records and return it, but that would be overkill. Someone
+#said that perl would like you to stay away from internals because you are
+#polite, not because it has a shotgun.
+sub get_records {
+
+	return @_contacts;
 }
 
 #Return a true value from a module, always.

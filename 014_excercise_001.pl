@@ -40,8 +40,8 @@ use warnings;
 #		- Must use the contact_revisited module.
 #		- Must separate modules:
 #			- A module must keep and interact with the records.
-#			- A class must take user input through stdin.
-#			- A third class must take the input and generate the output.
+#			- Another must take user input through stdin.
+#			- A third must be a that takes the input and generates the output.
 #			- The main script does set up.
 
 #First off, given that we must use separate modules, this is a good chance to
@@ -59,14 +59,12 @@ record_manager_exercise::read_records();
 #sake, but for the purposes of this example we load and setup them separatedly.
 #Open now the file for the next module and read through:
 
-#use input_manager_exercise;
-#my $input_manager=input_manager_exercise->new();
-
-#Finally, this other module, read the file...
-#use controller_module_excercice;
+#Finally, this other module, read the file and notice how it requires a third
+#module...
+use controller_module_excercise;
 
 #All that is left, is the setup...
-#my $controller_module=controller_module_excercise->new($input_manager);
-#$controller_module->run();
+my $controller=controller_module_excercise->new();
+$controller->run();
 
 
