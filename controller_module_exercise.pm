@@ -7,6 +7,11 @@ package controller_module_exercise;
 #This module requires yet another one... Check it before continuing on.
 use input_manager_exercise; 
 
+#It also requires this module for the last subroutine (__new)... This is done
+#in purpose: input_manager_exercise (which we just required) requires 
+#"input_module" too, but does not import it into the global scope.
+use input_module;
+
 #Constructor: its only state is the record_manager. Providing it to the 
 #constructor instead of creating it inside the constructor is a form of
 #dependency injection.
@@ -197,9 +202,24 @@ sub __find_and_print {
 	return 1;
 }
 
+#This is the only subroutine that is a bit different from the rest, because it
+#must prompt for different pieces of data. It is, however, trivial:
+
 sub __new {
 
-	#TODO: 
+	my $this=shift;
+
+	print "Enter name (empty to cancel)";
+	#This is very nice and compact.
+	return 2 if !length(my $name=input_module::get_input());
+
+	print "Enter address (empty to cancel)";
+	return 2 if !length(my $address=input_module::get_input());
+
+	print "Enter phone (empty to cancel)";
+	return 2 if !length(my $phone=input_module::get_input());
+
+	return $this->{rm}->create_record($name, $address, $phone);
 }
 
 1

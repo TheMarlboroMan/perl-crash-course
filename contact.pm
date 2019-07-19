@@ -36,24 +36,51 @@ sub new {
 	#You are free to choose your internal implementation for class data. Here I
 	#will choose a map... Notice how the numbers will be stored as a reference.
 	#to this local array.
-	my %data=(name => $name, numbers => \@numbers);
+	#Keen readers will notice that self is a hash/map but its sigil is $, that
+	#is used for scalars... Okay, notice that the hash pairs are between {}:
+	#that creates a reference to the hash, so "self" if actually a reference to
+	#a hash.
+	my $self={name => $name, numbers => \@numbers};
 
 	#And now for the funky part. Blessing: this hurts, but it basically says
-	#that data shall be from now on associated with the classname and will be
-	#our instance.
-	bless \%data, $class;
+	#that $self shall be from now on associated with the classname and will be
+	#our instance. We always "bless" references and because $self is a reference
+	#already, our work is cut out for us.
+	bless $self, $class;
 
 	#Finally the instance is returned... There is something interesting here:
 	#nothing stops the class client to access our data structure directly: it's
 	#only an agreement that clients should use the public interface provided
 	#by the module. Anyhow, there are techniques to enforce encapsulation,
 	#but let's keep this simple...
-	return \%data;
+	#By the way, we must also return a reference. Remember that $self is a 
+	#reference, so no worries here...
+	return $self;
 
-	#One VERY important thing: we have chosen here to create a data hash and 
-	#then bless a reference to it and returning it... It would have been much
-	#easier to just do my $data={name => $name, numbers => \@numbers}, hence
-	#directly creating a reference to a hash thanks to the curly bracket syntax.
+	#Just so you know, evaluating "bless $self, $class returns $self. As you
+	#already know, when no explicit "return" is specified, Perl will return the
+	#result of evaluating the last expression, so "return $self" is just not
+	#needed.
+}
+
+#Before continuing on, take a look at this alternative syntax for the very same
+#constructor:
+
+sub alternative_new {
+
+	my $class=shift;
+	my $name=shift;
+	my $phone=shift;
+	my @numbers=($phone);
+
+	#self is now a real hash...
+	my %self=(name => $name, numbers => \@numbers);
+	#...so we must bless a reference to it...
+	bless \%self, $class;
+	#...and return a reference.
+	return \%self;
+
+	#You can see how this syntax is not very friendly.
 }
 
 #Now, let's do our getters... All methods are subroutines...
