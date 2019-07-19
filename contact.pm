@@ -30,8 +30,10 @@ sub new {
 	#so the other arguments are the ones we want.
 	my $class=shift;
 	my $name=shift;
+
 	my $phone=shift;
-	my @numbers=($phone);
+	my @numbers=();
+	push(@numbers, $phone) if defined $phone; #Maybe we didn't pass the phone along...
 
 	#You are free to choose your internal implementation for class data. Here I
 	#will choose a map... Notice how the numbers will be stored as a reference.

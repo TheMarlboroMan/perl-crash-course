@@ -85,7 +85,7 @@ Available commands:
 	-add [id phone]
 	-remove [id phone]
 	-setname [id newvalue]
-	-setaddress[id newvalue]
+	-setaddress [id newvalue]
 	-byname [find]
 	-byaddress [find]
 	-byphone[find]
@@ -143,7 +143,10 @@ sub __remove {
 
 	my $this=shift;
 	return if !__validate_input(2, @_);
-	return $this->{rm}->remove_phone_from_record(shift, shift);
+	#Learn from my mistakes... See how this subroutine is called "__remove"?
+	#well, the subroutine in the supporting module is called "delete_xxxx". You
+	#should strive to keep a consistent approach to your names.
+	return $this->{rm}->delete_phone_from_record(shift, shift);
 }
 
 #And more glue...
@@ -178,7 +181,7 @@ sub __by_address {
 sub __by_phone {
 
 	my $this=shift;
-	return $this->__find_and_print("phone", @_);
+	return $this->__find_and_print("numbers", @_);
 }
 
 #Common glue find...

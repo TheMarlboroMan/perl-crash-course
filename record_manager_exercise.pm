@@ -106,11 +106,13 @@ sub _read_records_from_file {
 			die;
 		}
 
-		my @phones=split ',', $phones;
-		my $record=contact_revisited->new($name, shift  @phones, $address, $id);
+
+		
+		#Create the contact with no phones...
+		my $record=contact_revisited->new($name, undef, $address, $id);
 
 		#As long as there are phones left, add them...
-		for (@phones) {
+		for(split ',', $phones) {
 			$record->add_number($_); #This is another $_ than the one above...
 		}
 
@@ -124,7 +126,7 @@ sub _read_records_from_file {
 
 #This subroutine will take two values: the first is a string indicating the
 #"field" we are searching, and the second indicates the value we search. The
-#subroutine will return undef if cannot find anything, or an array of results.
+#subroutine will return undef if cannot  anything, or an array of results.
 #There is a third parameter, it. It will be passed along when we want to get
 #the index of the result.
 sub find_records {
@@ -139,35 +141,41 @@ sub find_records {
 
 	my @results;
 
+	#Let us validate the data...
+	my @possible_values=("id", "name", "address", "numbers");
+
+	#Grep performs a regular expression... ^ and $ are "beginning of a line" and
+	#"end of the line", thus we want to know if $field is any of 
+	#@possible_values. The important takeaway here is that you can do grep on 
+	#arrays.
+	if(! grep(/^$field$/, @possible_values)) {
+		print "Unknown field '$field' to 'find_records', exiting\n";
+		die();
+	}
+
+	#This is ugly, but we can use strings to compose subroutines names and 
+	#call them later...
+	my $methodname="get_".$field;
+
 	for my $current (@{$this->{storage}}) {
+
 		if($field eq "id") {
-			if($current->get_id() == $value) {
+			if($current->$methodname() == $value) {
 				push @results, $current;
 				last; #No need to keep going, we have only 1 value per id.
 			}
 		}
-		#This is ugly, but we can use strings to call subroutines...
 		elsif($field eq "name" or $field eq "address") {
 
-			#Compose the method name and call it...
-			my $methodname="get_".$field;
-			#A bit of regex magic...
-			if($current->$methodname() =~ /$value/) {
+			#A bit of regex magic... Notice the "insensitive" tag...
+			if($current->$methodname() =~ /$value/i) {
 				push @results, $current;
 			}
 		}
-		elsif($field eq "phone") {
-
-			#TODO: regexes work on arrays too...
-			#The phone case is slightly different, but easy too
-			my $phones=join ",", $current->get_numbers();
-			if($phones =~ /$value/) {
+		elsif($field eq "numbers") {
+			if(grep(/$value/, $current->$methodname())) {
 				push @results, $current;
 			}
-		}
-		else {
-			print "Unknown field '$field' to 'find_records', exiting\n";
-			die();
 		}
 
 		++$it if defined $it;
